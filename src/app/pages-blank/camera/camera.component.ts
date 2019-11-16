@@ -52,30 +52,34 @@ export class CameraComponent implements OnInit, OnDestroy {
 		this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
 		await this.nesClient.connect();
 
-		this.nesClient.onUpdate = messages => {
-			this.rectData = [];
+		this.nesClient.onUpdate = ({ type, data }) => {
+			if (type === 'imageData') {
+				this.rectData = [];
 
-			if (!this.videoRect) return;
+				if (!this.videoRect) return;
 
-			messages.forEach(
-				({
-					name: label,
-					direction,
-					area,
-					confidence,
-					vertex: { x1, x2, x3, x4, y1, y2, y3, y4 },
-				}) => {
-					this.rectData.push({
-						width: (x2 - x1) * this.videoRect.width,
-						height: (y4 - y2) * this.videoRect.height,
-						x: x1 * this.videoRect.width,
-						y: y1 * this.videoRect.height,
+				data.forEach(
+					({
+						name: label,
+						direction,
+						area,
+						confidence,
+						vertex: { x1, x2, x3, x4, y1, y2, y3, y4 },
+					}) => {
+						this.rectData.push({
+							width: (x2 - x1) * this.videoRect.width,
+							height: (y4 - y2) * this.videoRect.height,
+							x: x1 * this.videoRect.width,
+							y: y1 * this.videoRect.height,
 
-						label,
-						confidence: confidence.toFixed(2),
-					});
-				}
-			);
+							label,
+							confidence: confidence.toFixed(2),
+						});
+					}
+				);
+			} else {
+				//
+			}
 		};
 
 		this.lastUpdateTimestamp = performance.now();
