@@ -1,5 +1,5 @@
 import { CONFIG } from './../../config/api';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import Nes from '@hapi/nes/lib/client';
 
 @Component({
@@ -7,7 +7,7 @@ import Nes from '@hapi/nes/lib/client';
 	templateUrl: './camera.component.html',
 	styleUrls: ['./camera.component.css'],
 })
-export class CameraComponent implements OnInit {
+export class CameraComponent implements OnInit, OnDestroy {
 	@ViewChild('videoRoot', { static: true })
 	videoRef: ElementRef;
 
@@ -33,14 +33,20 @@ export class CameraComponent implements OnInit {
 		}
 	] = [];
 
+	videoResizeObserver;
+
 	constructor() {}
 
-	async ngOnInit() {
+	ngOnInit() {
 		this.initCanvas();
 
 		this.initStream();
 
 		this.initWebSocket();
+	}
+
+	ngOnDestroy() {
+		this.videoResizeObserver.unobserve(this.videoRef.nativeElement);
 	}
 
 	initCanvas() {
@@ -56,12 +62,7 @@ export class CameraComponent implements OnInit {
 		this.nesClient.onUpdate = (messages: []) => {
 			this.rectData = [];
 
-			if (!this.videoRect) {
-				this.videoRect = this.videoRef.nativeElement.getBoundingClientRect();
-
-				this.canvasRef.nativeElement.width = this.videoRect.width;
-				this.canvasRef.nativeElement.height = this.videoRect.height;
-			}
+			if (!this.videoRect) return;
 
 			messages.forEach(
 				({
@@ -100,6 +101,15 @@ export class CameraComponent implements OnInit {
 		});
 
 		this.videoRef.nativeElement.srcObject = stream;
+
+		this.videoResizeObserver = new ResizeObserver(entries => {
+			this.videoRect = entries[0].contentRect;
+
+			this.canvasRef.nativeElement.width = this.videoRect.width;
+			this.canvasRef.nativeElement.height = this.videoRect.height;
+		});
+
+		this.videoResizeObserver.observe(this.videoRef.nativeElement);
 	}
 
 	sendFrameToWebSocket() {
