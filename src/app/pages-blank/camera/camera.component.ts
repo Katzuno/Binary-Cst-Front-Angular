@@ -20,6 +20,19 @@ export class CameraComponent implements OnInit {
 
 	lastUpdateTimestamp: number;
 
+	videoRect: ClientRect;
+
+	rectData: [
+		{
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+			label: string;
+			confidence: string;
+		}
+	] = [];
+
 	constructor() {}
 
 	async ngOnInit() {
@@ -39,6 +52,34 @@ export class CameraComponent implements OnInit {
 	async initWebSocket() {
 		this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
 		await this.nesClient.connect();
+
+		this.nesClient.onUpdate = (messages: []) => {
+			this.rectData = [];
+
+			if (!this.videoRect) {
+				this.videoRect = this.videoRef.nativeElement.getBoundingClientRect();
+			}
+
+			messages.forEach(
+				({
+					name: label,
+					direction,
+					area,
+					confidence,
+					vertex: { x1, x2, x3, x4, y1, y2, y3, y4 },
+				}) => {
+					this.rectData.push({
+						width: (x2 - x1) * this.videoRect.width,
+						height: (y4 - y2) * this.videoRect.height,
+						x: x1 * this.videoRect.width,
+						y: y1 * this.videoRect.height,
+
+						label,
+						confidence: confidence.toFixed(2),
+					});
+				}
+			);
+		};
 
 		this.lastUpdateTimestamp = performance.now();
 		requestAnimationFrame(() => {
@@ -68,8 +109,7 @@ export class CameraComponent implements OnInit {
 
 		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
 		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
-
-		this.drawRect({ x: 188, y: 50, width: 200, height: 100, label: 'person', confidence: 0.93 });
+		this.drawRect();
 
 		if (deltaTime < 1000 / CONFIG.fps) {
 			return;
@@ -79,7 +119,11 @@ export class CameraComponent implements OnInit {
 		this.nesClient.message(image);
 	}
 
-	drawRect({ x, y, width, height, label, confidence }) {
+	drawRect() {
+		if (this.rectData.length <= 0) return;
+
+		console.log(this.rectData);
+
 		const fontSize = 16;
 		const padding = 8;
 		const strokeSize = 2;
@@ -88,25 +132,27 @@ export class CameraComponent implements OnInit {
 
 		this.canvasContext.fillStyle = rectColor;
 
-		const text = `${label}: ${confidence}`;
+		this.rectData.forEach(({ x, y, width, height, label, confidence }) => {
+			const text = `${label}: ${confidence}`;
 
-		const textWidth = this.canvasContext.measureText(text).width;
+			const textWidth = this.canvasContext.measureText(text).width;
 
-		this.canvasContext.fillRect(
-			x - strokeSize,
-			y - (fontSize + padding * 2),
-			textWidth + padding * 2,
-			fontSize + padding * 2
-		);
+			this.canvasContext.fillRect(
+				x - strokeSize,
+				y - (fontSize + padding * 2),
+				textWidth + padding * 2,
+				fontSize + padding * 2
+			);
 
-		this.canvasContext.font = `${fontSize}px Roboto`;
-		this.canvasContext.fillStyle = rectColorContrast;
-		this.canvasContext.fillText(text, x + padding - strokeSize, y - padding - strokeSize);
+			this.canvasContext.font = `${fontSize}px Roboto`;
+			this.canvasContext.fillStyle = rectColorContrast;
+			this.canvasContext.fillText(text, x + padding - strokeSize, y - padding - strokeSize);
 
-		this.canvasContext.beginPath();
-		this.canvasContext.lineWidth = 2;
-		this.canvasContext.strokeStyle = rectColor;
-		this.canvasContext.rect(x, y, width, height);
-		this.canvasContext.stroke();
+			this.canvasContext.beginPath();
+			this.canvasContext.lineWidth = 2;
+			this.canvasContext.strokeStyle = rectColor;
+			this.canvasContext.rect(x, y, width, height);
+			this.canvasContext.stroke();
+		});
 	}
 }
