@@ -20,6 +20,8 @@ export class CameraComponent implements OnInit, OnDestroy {
 
 	lastUpdateTimestamp: number;
 
+	lastFrame;
+
 	videoRect: ClientRect;
 
 	rectData: [
@@ -122,6 +124,7 @@ export class CameraComponent implements OnInit, OnDestroy {
 
 		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
 		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
+		this.lastFrame = image;
 		this.drawRect();
 
 		if (deltaTime < 1000 / CONFIG.fps) {

@@ -1,33 +1,59 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { VoiceService } from 'src/app/services/voice.service';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {VoiceService} from 'src/app/services/voice.service';
 
 @Component({
-	selector: 'app-stot',
-	templateUrl: './stot.component.html',
-	styleUrls: ['./stot.component.css'],
+    selector: 'app-stot',
+    templateUrl: './stot.component.html',
+    styleUrls: ['./stot.component.css'],
 })
 export class StotComponent implements OnInit {
-	@ViewChild('readButton', { static: true })
-	readButton: ElementRef;
+    @Input() img;
+    @ViewChild('readButton', {static: true})
+    readButton: ElementRef;
 
-	constructor(private voiceService: VoiceService) {}
+    postQuestion = false;
+    question: string;
 
-	ngOnInit() {
-		window.addEventListener('click', () => {
-			this.voiceService.start(this.onResult.bind(this));
-		});
-	}
+    constructor(private voiceService: VoiceService) {
+    }
 
-	onResult(event) {
-		const current = event.resultIndex;
+    ngOnInit() {
+        window.addEventListener('click', () => {
+            this.voiceService.start(this.onResult.bind(this));
+        });
+    }
 
-		const transcript = event.results[current][0].transcript;
+    onResult(event) {
+        const current = event.resultIndex;
 
-		const mobileRepeatBug = current === 1 && transcript === event.results[0][0].transcript;
+        const transcript = event.results[current][0].transcript;
 
-		if (!mobileRepeatBug) {
-			console.log(transcript);
-			this.voiceService.read(transcript);
-		}
-	}
+        const mobileRepeatBug = current === 1 && transcript === event.results[0][0].transcript;
+
+        if (!mobileRepeatBug) {
+            if (this.postQuestion) {
+                if (transcript.includes('yes')) {
+                    this.voiceService.postQuestion(this.question, this.img).toPromise().then(res => {
+                        console.log(res);
+                    });
+                    this.voiceService.read('Great, just posted it for you. Have a great day!');
+                }
+                this.postQuestion = false;
+                return;
+            }
+            // console.log(transcript);
+            // this.voiceService.read(transcript);
+            this.checkCommand(transcript);
+        }
+    }
+
+    checkCommand(command: string) {
+        if (command.includes('water')) {
+            console.log('I NEED WATER');
+        } else {
+            this.question = command;
+            this.voiceService.read('Sorry, I can not help you with this. Wold you like to post this question ?');
+            this.postQuestion = true;
+        }
+    }
 }
