@@ -29,6 +29,8 @@ export class CameraComponent implements OnInit, OnDestroy {
 
     videoResizeObserver;
 
+    searchObjects = {};
+
     constructor(private voiceService: VoiceService) {
     }
 
@@ -38,10 +40,22 @@ export class CameraComponent implements OnInit, OnDestroy {
         this.initStream();
 
         this.initWebSocket();
+
+        // this.alertObjects();
     }
 
     ngOnDestroy() {
         this.videoResizeObserver.unobserve(this.videoRef.nativeElement);
+    }
+
+    alertObjects() {
+        setInterval(() => {
+            let text = 'You have ';
+            this.rectData.filter(obj => ['Person', 'Table', 'Chair'].includes(obj.label)).forEach(obj => {
+                text += ` a ${obj.label} on ${obj.direction},`;
+            });
+            this.voiceService.read(text);
+        }, 5000);
     }
 
     initCanvas() {
@@ -78,8 +92,21 @@ export class CameraComponent implements OnInit, OnDestroy {
 
                             label,
                             confidence: confidence.toFixed(2),
-                            area: area.toFixed(2)
+                            area: area.toFixed(2),
+                            direction
                         });
+
+                        //Check if search objects are in frame
+                        let text = 'I found ';
+                        for (let objLabel in this.searchObjects) {
+                            if (this.searchObjects[objLabel].includes(label)) {
+                                text += label + ' on ' + direction;
+                                delete this.searchObjects[objLabel];
+                            }
+                        }
+                        if (text !== 'I found ') {
+                            this.voiceService.read(text);
+                        }
                     }
                 );
             } else if (type === 'responses') {
@@ -145,7 +172,7 @@ export class CameraComponent implements OnInit, OnDestroy {
             return;
         }
 
-        console.log(this.rectData);
+        // console.log(this.rectData);
 
         const fontSize = 16;
         const padding = 8;
@@ -153,8 +180,10 @@ export class CameraComponent implements OnInit, OnDestroy {
         const rectColor = 'green';
         const rectColorContrast = 'white';
 
-        this.rectData.forEach(({x, y, width, height, label, confidence, area}) => {
-            const text = `${label}: ${confidence} | ${area}`;
+        this.rectData = this.rectData.filter(e => e.area > 0.1);
+
+        this.rectData.forEach(({x, y, width, height, label, confidence, area, direction}) => {
+            const text = `${label}: ${confidence} | ${area} | ${direction}`;
 
             const textWidth = this.canvasContext.measureText(text).width;
             const textHeight = fontSize + 2 * padding;
@@ -177,5 +206,11 @@ export class CameraComponent implements OnInit, OnDestroy {
             this.canvasContext.rect(x, y, width, height);
             this.canvasContext.stroke();
         });
+    }
+
+    callCommand(cmd) {
+        this.voiceService.read('Sure! I will search the room for a ' + cmd.label);
+        this.searchObjects[cmd.label] = cmd.tags;
+        // console.log(this.searchObjects);
     }
 }

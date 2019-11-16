@@ -30,6 +30,9 @@ export class ListComponent implements OnInit {
             cancelButtonClass: 'btn btn-danger',
             buttonsStyling: false
         }).then(result => {
+            if (!result.value) {
+                return;
+            }
             this.voiceService.postResponse(q_id, $('#input-field').val()).toPromise().then((res) => {
                 // @ts-ignore
                 if (res.data != false) {

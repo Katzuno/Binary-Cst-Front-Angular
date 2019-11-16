@@ -8,6 +8,7 @@ import {VoiceService} from 'src/app/services/voice.service';
 })
 export class StotComponent implements OnInit {
     @Input() img;
+    @Input() callCommand;
     @ViewChild('readButton', {static: true})
     readButton: ElementRef;
 
@@ -48,8 +49,14 @@ export class StotComponent implements OnInit {
     }
 
     checkCommand(command: string) {
+        const tags = {
+            water: ['Bottle'],
+            apple: ['Apple', 'Fruit']
+        };
         if (command.includes('water')) {
-            console.log('I NEED WATER');
+            this.callCommand({label: 'water', tags: tags.water});
+        } else if (command.includes('apple')) {
+            this.callCommand({label: 'apple', tags: tags.apple});
         } else {
             this.question = command;
             this.voiceService.read('Sorry, I can not help you with this. Wold you like to post this question ?');
