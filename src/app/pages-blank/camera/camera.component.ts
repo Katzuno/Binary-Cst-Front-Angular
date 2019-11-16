@@ -8,9 +8,10 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 })
 export class CameraComponent implements OnInit {
 	@ViewChild('videoRoot', { static: true })
-	videoElement: ElementRef;
+	videoRef: ElementRef;
 
-	canvas: HTMLCanvasElement;
+	@ViewChild('canvasRoot', { static: true })
+	canvasRef: ElementRef;
 
 	canvasContext: CanvasRenderingContext2D;
 
@@ -27,20 +28,14 @@ export class CameraComponent implements OnInit {
 	}
 
 	initCanvas() {
-		this.canvas = document.createElement('canvas');
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
-		this.canvasContext = this.canvas.getContext('2d');
+		this.canvasRef.nativeElement = document.createElement('canvas');
+		this.canvasRef.nativeElement.width = window.innerWidth;
+		this.canvasRef.nativeElement.height = window.innerHeight;
+		this.canvasContext = this.canvasRef.nativeElement.getContext('2d');
 	}
 
 	initWebSocket() {
 		this.webSocket = new WebSocket(API.webSocketUrl);
-	}
-
-	async initStream() {
-		const stream = await navigator.mediaDevices.getUserMedia({
-			video: { width: window.innerWidth, height: window.innerHeight },
-		});
 
 		this.webSocket.addEventListener('open', () => {
 			requestAnimationFrame(() => {
@@ -49,9 +44,15 @@ export class CameraComponent implements OnInit {
 		});
 	}
 
+	async initStream() {
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: { width: window.innerWidth, height: window.innerHeight },
+		});
+	}
+
 	getFrame() {
-		this.canvasContext.drawImage(this.videoElement.nativeElement, 0, 0);
-		const image = this.canvas.toDataURL('image/png');
+		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
+		const image = this.canvasRef.nativeElement.toDataURL('image/png');
 		console.log(image);
 		return image;
 	}
