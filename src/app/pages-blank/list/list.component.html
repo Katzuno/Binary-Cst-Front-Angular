@@ -1,7 +1,7 @@
 <div class="section">
     <div class="container">
         <div class="row" *ngIf="questions | async as questionList">
-            <div class="col-md-4" *ngFor="let question of questionList.data">
+            <div class="col-md-4" *ngFor="let question of questionList.data" [id]="'q' + question.question_id">
                 <div class="card" (click)="showAlert(question.question_id)">
                     <div class="card-header" [style.background-image]="'url(' + question.image + ')'">
                     </div>
