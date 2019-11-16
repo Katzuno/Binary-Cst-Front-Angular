@@ -1,5 +1,6 @@
 import { API } from './../../config/api';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import Nes from '@hapi/nes/lib/client';
 
 @Component({
 	selector: 'app-camera',
@@ -15,16 +16,16 @@ export class CameraComponent implements OnInit {
 
 	canvasContext: CanvasRenderingContext2D;
 
-	webSocket: WebSocket;
+	nesClient;
 
 	constructor() {}
 
 	async ngOnInit() {
 		this.initCanvas();
 
-		this.initWebSocket();
-
 		this.initStream();
+
+		this.initWebSocket();
 	}
 
 	initCanvas() {
@@ -35,13 +36,10 @@ export class CameraComponent implements OnInit {
 	}
 
 	initWebSocket() {
-		this.webSocket = new WebSocket(API.webSocketUrl);
+		this.nesClient = new Nes.Client(API.webSocketUrl);
+		this.nesClient.connect();
 
-		this.webSocket.addEventListener('open', () => {
-			requestAnimationFrame(() => {
-				this.webSocket.send(this.getFrame());
-			});
-		});
+		this.nesClient.message('test msg');
 	}
 
 	async initStream() {
