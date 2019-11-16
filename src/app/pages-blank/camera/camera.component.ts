@@ -58,6 +58,9 @@ export class CameraComponent implements OnInit {
 
 			if (!this.videoRect) {
 				this.videoRect = this.videoRef.nativeElement.getBoundingClientRect();
+
+				this.canvasRef.nativeElement.width = this.videoRect.width;
+				this.canvasRef.nativeElement.height = this.videoRect.height;
 			}
 
 			messages.forEach(
@@ -130,26 +133,26 @@ export class CameraComponent implements OnInit {
 		const rectColor = 'green';
 		const rectColorContrast = 'white';
 
-		this.canvasContext.fillStyle = rectColor;
-
 		this.rectData.forEach(({ x, y, width, height, label, confidence }) => {
 			const text = `${label}: ${confidence}`;
 
 			const textWidth = this.canvasContext.measureText(text).width;
+			const textHeight = fontSize + 2 * padding;
 
 			this.canvasContext.fillRect(
-				x - strokeSize,
-				y - (fontSize + padding * 2),
+				x,
+				y - (fontSize + padding * 2 - textHeight),
 				textWidth + padding * 2,
 				fontSize + padding * 2
 			);
 
 			this.canvasContext.font = `${fontSize}px Roboto`;
 			this.canvasContext.fillStyle = rectColorContrast;
-			this.canvasContext.fillText(text, x + padding - strokeSize, y - padding - strokeSize);
+			this.canvasContext.fillText(text, x + padding, y + padding + textHeight / 2);
 
 			this.canvasContext.beginPath();
 			this.canvasContext.lineWidth = 2;
+			this.canvasContext.fillStyle = rectColor;
 			this.canvasContext.strokeStyle = rectColor;
 			this.canvasContext.rect(x, y, width, height);
 			this.canvasContext.stroke();
