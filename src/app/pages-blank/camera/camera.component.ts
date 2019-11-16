@@ -18,6 +18,8 @@ export class CameraComponent implements OnInit {
 
 	nesClient;
 
+	lastUpdateTimestamp: number;
+
 	constructor() {}
 
 	async ngOnInit() {
@@ -38,6 +40,7 @@ export class CameraComponent implements OnInit {
 		this.nesClient = new Nes.Client(API.webSocketUrl);
 		await this.nesClient.connect();
 
+		this.lastUpdateTimestamp = performance.now();
 		requestAnimationFrame(() => {
 			this.sendFrameToWebSocket();
 		});
@@ -56,10 +59,15 @@ export class CameraComponent implements OnInit {
 			this.sendFrameToWebSocket();
 		});
 
+		const currentTimestamp = performance.now();
+		const deltaTime = currentTimestamp - this.lastUpdateTimestamp;
+
 		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
 		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
-		this.nesClient.message(image);
 
-		return image;
+		if (deltaTime < 1000 / API.fps) return;
+
+		this.lastUpdateTimestamp = currentTimestamp;
+		this.nesClient.message(image);
 	}
 }
