@@ -24,16 +24,7 @@ export class CameraComponent implements OnInit, OnDestroy {
 
 	videoRect: ClientRect;
 
-	rectData: [
-		{
-			x: number;
-			y: number;
-			width: number;
-			height: number;
-			label: string;
-			confidence: string;
-		}
-	] = [];
+	rectData = [];
 
 	videoResizeObserver;
 
@@ -61,7 +52,7 @@ export class CameraComponent implements OnInit, OnDestroy {
 		this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
 		await this.nesClient.connect();
 
-		this.nesClient.onUpdate = (messages: []) => {
+		this.nesClient.onUpdate = messages => {
 			this.rectData = [];
 
 			if (!this.videoRect) return;
@@ -104,6 +95,7 @@ export class CameraComponent implements OnInit, OnDestroy {
 
 		this.videoRef.nativeElement.srcObject = stream;
 
+		// @ts-ignore
 		this.videoResizeObserver = new ResizeObserver(entries => {
 			this.videoRect = entries[0].contentRect;
 
@@ -136,7 +128,7 @@ export class CameraComponent implements OnInit, OnDestroy {
 	}
 
 	drawRect() {
-		if (this.rectData.length <= 0) return;
+		if (!this.rectData || this.rectData.length <= 0) return;
 
 		console.log(this.rectData);
 
