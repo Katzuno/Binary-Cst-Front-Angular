@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {VoiceService} from 'src/app/services/voice.service';
 
 @Component({
     selector: 'app-stot',
@@ -6,54 +7,15 @@ import {Component, OnInit} from '@angular/core';
     styleUrls: ['./stot.component.css']
 })
 export class StotComponent implements OnInit {
-    recognition;
 
-    constructor() {
+
+    constructor(private voiceService: VoiceService) {
     }
 
     ngOnInit() {
-        try {
-            // @ts-ignore
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            this.recognition = new SpeechRecognition();
-
-            this.initRec();
-        } catch (e) {
-            console.error(e);
-        }
+        this.voiceService.start(this.onResult.bind(this));
     }
 
-    initRec() {
-        this.recognition.continuous = true;
-
-        this.recognition.onresult = this.onResult.bind(this);
-
-        this.recognition.start();
-
-        this.recognition.onstart = function () {
-            console.log('Voice recognition activated. Try speaking into the microphone.');
-        };
-
-        this.recognition.onspeechend = function () {
-            console.log('You were quiet for a while so voice recognition turned itself off.');
-        };
-
-        // setTimeout(() => {
-        //     this.recognition.stop();
-        // }, 5000);
-    }
-
-    readOutLoud(message) {
-        const speech = new SpeechSynthesisUtterance();
-
-        // Set the text and voice attributes.
-        speech.text = message;
-        speech.volume = 1;
-        speech.rate = 1;
-        speech.pitch = 1;
-
-        window.speechSynthesis.speak(speech);
-    }
 
     onResult(event) {
         const current = event.resultIndex;
@@ -64,7 +26,8 @@ export class StotComponent implements OnInit {
 
         if (!mobileRepeatBug) {
             console.log(transcript);
-            this.readOutLoud(transcript);
+            // this.readOutLoud(transcript);
+            this.voiceService.read(transcript);
         }
     }
 
