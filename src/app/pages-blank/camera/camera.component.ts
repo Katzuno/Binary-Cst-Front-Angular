@@ -1,4 +1,4 @@
-import { API } from './../../config/api';
+import { CONFIG } from './../../config/api';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Nes from '@hapi/nes/lib/client';
 
@@ -37,7 +37,7 @@ export class CameraComponent implements OnInit {
 	}
 
 	async initWebSocket() {
-		this.nesClient = new Nes.Client(API.webSocketUrl);
+		this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
 		await this.nesClient.connect();
 
 		this.lastUpdateTimestamp = performance.now();
@@ -65,7 +65,7 @@ export class CameraComponent implements OnInit {
 		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
 		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
 
-		if (deltaTime < 1000 / API.fps) return;
+		if (deltaTime < 1000 / CONFIG.fps) return;
 
 		this.lastUpdateTimestamp = currentTimestamp;
 		this.nesClient.message(image);
