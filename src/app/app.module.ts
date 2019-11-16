@@ -48,7 +48,6 @@ import {AdminLayoutComponent} from './layouts/admin/admin-layout.component';
 import {AuthLayoutComponent} from './layouts/auth/auth-layout.component';
 
 import {AppRoutes} from './app.routing';
-import { CameraComponent } from './pages-blank/camera/camera.component';
 
 @NgModule({
     exports: [
@@ -84,7 +83,6 @@ import { CameraComponent } from './pages-blank/camera/camera.component';
         MatToolbarModule,
         MatTooltipModule,
     ],
-    declarations: [CameraComponent],
 })
 export class MaterialModule {
 }
