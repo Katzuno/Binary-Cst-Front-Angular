@@ -88,6 +88,9 @@ import {ListComponent} from './pages-blank/list/list.component';
         MatTooltipModule,
     ],
     declarations: [ListComponent],
+    imports: [
+        CommonModule
+    ]
 })
 export class MaterialModule {
 }

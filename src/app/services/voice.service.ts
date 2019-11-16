@@ -51,4 +51,9 @@ export class VoiceService {
     get questions() {
         return this.http.get(CONFIG.apiUrl + '/questions');
     }
+
+    postResponse(q_id, response) {
+        return this.http.post(CONFIG.apiUrl + '/response', {question_id: q_id, response});
+        // console.log('post question', q, img);
+    }
 }

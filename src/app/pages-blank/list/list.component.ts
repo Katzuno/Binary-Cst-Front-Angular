@@ -1,4 +1,8 @@
 import {Component, OnInit} from '@angular/core';
+import {VoiceService} from 'src/app/services/voice.service';
+import swal from 'sweetalert2';
+
+declare var $: any;
 
 @Component({
     selector: 'app-list',
@@ -6,11 +10,35 @@ import {Component, OnInit} from '@angular/core';
     styleUrls: ['./list.component.css']
 })
 export class ListComponent implements OnInit {
+    questions;
 
-    constructor() {
+    constructor(private voiceService: VoiceService) {
     }
 
     ngOnInit() {
+        this.questions = this.voiceService.questions;
     }
 
+    showAlert(q_id) {
+        swal({
+            title: 'Input something',
+            html: '<div class="form-group">' +
+                '<input id="input-field" type="text" class="form-control" />' +
+                '</div>',
+            showCancelButton: true,
+            confirmButtonClass: 'btn btn-success',
+            cancelButtonClass: 'btn btn-danger',
+            buttonsStyling: false
+        }).then(result => {
+            this.voiceService.postResponse(q_id, $('#input-field').val()).toPromise().then(() => {
+                swal({
+                    type: 'success',
+                    html: 'Response submitted!',
+                    confirmButtonClass: 'btn btn-success',
+                    buttonsStyling: false
+
+                });
+            });
+        }).catch(swal.noop);
+    }
 }
