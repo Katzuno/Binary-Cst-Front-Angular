@@ -48,6 +48,7 @@ import {AdminLayoutComponent} from './layouts/admin/admin-layout.component';
 import {AuthLayoutComponent} from './layouts/auth/auth-layout.component';
 
 import {AppRoutes} from './app.routing';
+import {CameraComponent} from 'src/app/pages-blank/camera/camera.component';
 
 @NgModule({
     exports: [
@@ -101,7 +102,7 @@ export class MaterialModule {
         FooterModule,
         FixedpluginModule,
     ],
-    declarations: [AppComponent, AdminLayoutComponent, AuthLayoutComponent],
+    declarations: [AppComponent, AdminLayoutComponent, AuthLayoutComponent, CameraComponent],
     bootstrap: [AppComponent],
 })
 export class AppModule {

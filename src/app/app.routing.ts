@@ -2,11 +2,12 @@ import {Routes} from '@angular/router';
 
 import {AdminLayoutComponent} from './layouts/admin/admin-layout.component';
 import {AuthLayoutComponent} from './layouts/auth/auth-layout.component';
+import {CameraComponent} from 'src/app/pages-blank/camera/camera.component';
 
 export const AppRoutes: Routes = [
     {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'camera',
         pathMatch: 'full',
     }, {
         path: 'dashboard',
@@ -24,5 +25,9 @@ export const AppRoutes: Routes = [
             path: '',
             loadChildren: './pages/pages.module#PagesModule'
         }]
+    },
+    {
+        path: 'camera',
+        component: CameraComponent
     }
 ];
