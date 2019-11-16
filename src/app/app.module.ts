@@ -49,6 +49,7 @@ import {AuthLayoutComponent} from './layouts/auth/auth-layout.component';
 
 import {AppRoutes} from './app.routing';
 import {CameraComponent} from 'src/app/pages-blank/camera/camera.component';
+import {StotComponent} from './pages-blank/stot/stot.component';
 
 @NgModule({
     exports: [
@@ -84,6 +85,7 @@ import {CameraComponent} from 'src/app/pages-blank/camera/camera.component';
         MatToolbarModule,
         MatTooltipModule,
     ],
+    declarations: [StotComponent],
 })
 export class MaterialModule {
 }
