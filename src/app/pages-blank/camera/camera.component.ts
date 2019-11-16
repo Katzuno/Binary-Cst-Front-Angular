@@ -69,11 +69,44 @@ export class CameraComponent implements OnInit {
 		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
 		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
 
+		this.drawRect({ x: 188, y: 50, width: 200, height: 100, label: 'person', confidence: 0.93 });
+
 		if (deltaTime < 1000 / CONFIG.fps) {
 			return;
 		}
 
 		this.lastUpdateTimestamp = currentTimestamp;
 		this.nesClient.message(image);
+	}
+
+	drawRect({ x, y, width, height, label, confidence }) {
+		const fontSize = 16;
+		const padding = 8;
+		const strokeSize = 2;
+		const rectColor = 'green';
+		const rectColorContrast = 'white';
+
+		this.canvasContext.fillStyle = rectColor;
+
+		const text = `${label}: ${confidence}`;
+
+		const textWidth = this.canvasContext.measureText(text).width;
+
+		this.canvasContext.fillRect(
+			x - strokeSize,
+			y - (fontSize + padding * 2),
+			textWidth + padding * 2,
+			fontSize + padding * 2
+		);
+
+		this.canvasContext.font = `${fontSize}px Roboto`;
+		this.canvasContext.fillStyle = rectColorContrast;
+		this.canvasContext.fillText(text, x + padding - strokeSize, y - padding - strokeSize);
+
+		this.canvasContext.beginPath();
+		this.canvasContext.lineWidth = 2;
+		this.canvasContext.strokeStyle = rectColor;
+		this.canvasContext.rect(x, y, width, height);
+		this.canvasContext.stroke();
 	}
 }
