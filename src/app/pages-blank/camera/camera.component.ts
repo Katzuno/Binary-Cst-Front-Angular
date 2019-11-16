@@ -1,79 +1,83 @@
-import { CONFIG } from './../../config/api';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {CONFIG} from './../../config/api';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import Nes from '@hapi/nes/lib/client';
 
 @Component({
-	selector: 'app-camera',
-	templateUrl: './camera.component.html',
-	styleUrls: ['./camera.component.css'],
+    selector: 'app-camera',
+    templateUrl: './camera.component.html',
+    styleUrls: ['./camera.component.css'],
 })
 export class CameraComponent implements OnInit {
-	@ViewChild('videoRoot', { static: true })
-	videoRef: ElementRef;
+    @ViewChild('videoRoot', {static: true})
+    videoRef: ElementRef;
 
-	@ViewChild('canvasRoot', { static: true })
-	canvasRef: ElementRef;
+    @ViewChild('canvasRoot', {static: true})
+    canvasRef: ElementRef;
 
-	canvasContext: CanvasRenderingContext2D;
+    canvasContext: CanvasRenderingContext2D;
 
-	nesClient;
+    nesClient;
 
-	lastUpdateTimestamp: number;
+    lastUpdateTimestamp: number;
 
-	constructor() {}
+    lastFrame;
 
-	async ngOnInit() {
-		this.initCanvas();
+    constructor() {
+    }
 
-		this.initStream();
+    async ngOnInit() {
+        this.initCanvas();
 
-		this.initWebSocket();
-	}
+        this.initStream();
 
-	initCanvas() {
-		this.canvasRef.nativeElement.width = window.innerWidth;
-		this.canvasRef.nativeElement.height = window.innerHeight;
-		this.canvasContext = this.canvasRef.nativeElement.getContext('2d');
-	}
+        this.initWebSocket();
+    }
 
-	async initWebSocket() {
-		this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
-		await this.nesClient.connect();
+    initCanvas() {
+        this.canvasRef.nativeElement.width = window.innerWidth;
+        this.canvasRef.nativeElement.height = window.innerHeight;
+        this.canvasContext = this.canvasRef.nativeElement.getContext('2d');
+    }
 
-		this.lastUpdateTimestamp = performance.now();
-		requestAnimationFrame(() => {
-			this.sendFrameToWebSocket();
-		});
-	}
+    async initWebSocket() {
+        this.nesClient = new Nes.Client(CONFIG.webSocketUrl);
+        await this.nesClient.connect();
 
-	async initStream() {
-		const stream = await navigator.mediaDevices.getUserMedia({
-			video: {
-				width: window.innerWidth,
-				height: window.innerHeight,
-				facingMode: 'environment',
-			},
-		});
+        this.lastUpdateTimestamp = performance.now();
+        requestAnimationFrame(() => {
+            this.sendFrameToWebSocket();
+        });
+    }
 
-		this.videoRef.nativeElement.srcObject = stream;
-	}
+    async initStream() {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                facingMode: 'environment',
+            },
+        });
 
-	sendFrameToWebSocket() {
-		requestAnimationFrame(() => {
-			this.sendFrameToWebSocket();
-		});
+        this.videoRef.nativeElement.srcObject = stream;
+    }
 
-		const currentTimestamp = performance.now();
-		const deltaTime = currentTimestamp - this.lastUpdateTimestamp;
+    sendFrameToWebSocket() {
+        requestAnimationFrame(() => {
+            this.sendFrameToWebSocket();
+        });
 
-		this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
-		const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
+        const currentTimestamp = performance.now();
+        const deltaTime = currentTimestamp - this.lastUpdateTimestamp;
 
-		if (deltaTime < 1000 / CONFIG.fps) {
-			return;
-		}
+        this.canvasContext.drawImage(this.videoRef.nativeElement, 0, 0);
+        const image = this.canvasRef.nativeElement.toDataURL('image/jpeg');
+        this.lastFrame = image;
 
-		this.lastUpdateTimestamp = currentTimestamp;
-		this.nesClient.message(image);
-	}
+        if (deltaTime < 1000 / CONFIG.fps) {
+            return;
+        }
+
+        this.lastUpdateTimestamp = currentTimestamp;
+        this.nesClient.message(image);
+    }
 }

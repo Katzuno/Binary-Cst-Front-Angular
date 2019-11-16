@@ -1,4 +1,5 @@
 export const CONFIG = {
-	webSocketUrl: 'ws://localhost:3030',
-	fps: 10,
+    webSocketUrl: 'ws://192.168.0.210:3030',
+    fps: 10,
+    apiUrl: 'http://192.168.0.210:3030'
 };
