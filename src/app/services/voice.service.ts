@@ -24,11 +24,7 @@ export class VoiceService {
 
 		this.recognition.onstart = () => {};
 
-		this.recognition.onspeechend = () => {
-			setTimeout(() => {
-				this.recognition.start();
-			}, 10);
-		};
+		this.recognition.onspeechend = () => {};
 	}
 
 	read(message) {
