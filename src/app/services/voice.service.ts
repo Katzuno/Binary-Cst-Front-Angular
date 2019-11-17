@@ -20,10 +20,12 @@ export class VoiceService {
 
     start(f) {
         this.recognition.onresult = f;
-
         this.recognition.continuous = true;
-        this.recognition.start();
 
+        try {
+            this.recognition.start();
+        } catch (err) {
+        }
         this.recognition.onstart = () => {
         };
 
@@ -37,7 +39,7 @@ export class VoiceService {
         // Set the text and voice attributes.
         speech.text = message;
         speech.volume = 1;
-        speech.rate = 1.4;
+        speech.rate = 1.1;
         speech.pitch = 1;
 
         window.speechSynthesis.speak(speech);

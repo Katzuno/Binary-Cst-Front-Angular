@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {VoiceService} from 'src/app/services/voice.service';
 
 @Component({
@@ -9,6 +9,8 @@ import {VoiceService} from 'src/app/services/voice.service';
 export class StotComponent implements OnInit {
     @Input() img;
     @Input() callCommand;
+    @Input() alertState;
+    @Output() alertStateChange = new EventEmitter();
     @ViewChild('readButton', {static: true})
     readButton: ElementRef;
 
@@ -38,6 +40,9 @@ export class StotComponent implements OnInit {
                         console.log(res);
                     });
                     this.voiceService.read('Great, just posted it for you. Have a great day!');
+                    this.alertStateChange.emit(true);
+                } else {
+                    this.voiceService.read('Ok, I\'ll delete it.');
                 }
                 this.postQuestion = false;
                 return;
@@ -53,7 +58,14 @@ export class StotComponent implements OnInit {
             water: ['bottle'],
             apple: ['apple', 'aruit']
         };
-        if (command.includes('water')) {
+        console.log(command);
+        if (command.includes('enable') && command.includes('alerts')) {
+            this.voiceService.read('Just enabled the alerts for you.');
+            this.alertStateChange.emit(true);
+        } else if (command.includes('disable') && command.includes('alerts')) {
+            this.voiceService.read('Be safe! I have just disabled the alerts.');
+            this.alertStateChange.emit(false);
+        } else if (command.includes('water')) {
             this.callCommand({label: 'water', tags: tags.water});
         } else if (command.includes('apple')) {
             this.callCommand({label: 'apple', tags: tags.apple});
@@ -61,6 +73,8 @@ export class StotComponent implements OnInit {
             this.question = command;
             this.voiceService.read('Sorry, I can not help you with this. Wold you like to post this question ?');
             this.postQuestion = true;
+            this.alertStateChange.emit(false);
+            this.voiceService.start(this.onResult.bind(this));
         }
     }
 }

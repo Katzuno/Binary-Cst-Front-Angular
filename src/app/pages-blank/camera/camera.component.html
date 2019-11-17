@@ -1,3 +1,4 @@
 <video autoplay muted #videoRoot></video>
 <canvas #canvasRoot></canvas>
-<app-stot [img]="lastFrame" [callCommand]="callCommand.bind(this)"></app-stot>
+<app-stot [img]="lastFrame" [callCommand]="callCommand.bind(this)" [alertState]="alertState"
+          (alertStateChange)="this.alertState = $event"></app-stot>

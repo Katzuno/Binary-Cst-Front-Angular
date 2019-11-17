@@ -31,6 +31,8 @@ export class CameraComponent implements OnInit, OnDestroy {
 
     searchObjects = {};
 
+    alertState = false;
+
     constructor(private voiceService: VoiceService) {
     }
 
@@ -51,6 +53,9 @@ export class CameraComponent implements OnInit, OnDestroy {
 
     alertObjects() {
         setInterval(() => {
+            if (!this.alertState) {
+                return;
+            }
             let text = 'You have ';
 
             const alertData = this.rectData
@@ -92,7 +97,12 @@ export class CameraComponent implements OnInit, OnDestroy {
         await this.nesClient.connect();
 
         this.nesClient.onUpdate = ({type, data}) => {
-            if (type === 'imageData') {
+            if (type === 'face') {
+                if (!this.alertState) {
+                    return;
+                }
+                this.voiceService.read('Your friend ' + data.Name + ' is in front of you.');
+            } else if (type === 'imageData') {
                 this.rectData = [];
 
                 if (!this.videoRect) {
