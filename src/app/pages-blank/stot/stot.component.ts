@@ -50,8 +50,8 @@ export class StotComponent implements OnInit {
 
     checkCommand(command: string) {
         const tags = {
-            water: ['Bottle'],
-            apple: ['Apple', 'Fruit']
+            water: ['bottle'],
+            apple: ['apple', 'aruit']
         };
         if (command.includes('water')) {
             this.callCommand({label: 'water', tags: tags.water});
