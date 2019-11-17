@@ -33,6 +33,8 @@ export class CameraComponent implements OnInit, OnDestroy {
 
     alertState = false;
 
+    lastFriendDetection = 0;
+
     constructor(private voiceService: VoiceService) {
     }
 
@@ -44,6 +46,8 @@ export class CameraComponent implements OnInit, OnDestroy {
         this.initWebSocket();
 
         this.alertObjects();
+
+        // this.voiceService.read('Hi, I\'m Echo: ready to help you navigate this room.');
 
     }
 
@@ -73,15 +77,16 @@ export class CameraComponent implements OnInit, OnDestroy {
             });
 
             if (alertData[0]) {
-                text += `a ${alertData[0].label} on ${alertData[0].direction}`;
+                text += `a ${alertData[0].label} in ${Number.parseFloat(alertData[0].distance).toFixed(1)} meters on ${alertData[0].direction === 'front' ? alertData[0].direction : 'your ' + alertData[0].direction}`;
             }
             if (alertData[1]) {
-                text += ` and a ${alertData[1].label} on ${alertData[1].direction}`;
+                text += ` and a ${alertData[1].label} in ${Number.parseFloat(alertData[1].distance).toFixed(1)} meters on ${alertData[1].direction === 'front' ? alertData[1].direction : 'your ' + alertData[1].direction}`;
             }
 
             if (text === 'You have ') {
                 return;
             }
+            console.log(text);
             this.voiceService.read(text);
         }, 5000);
     }
@@ -101,6 +106,16 @@ export class CameraComponent implements OnInit, OnDestroy {
                 if (!this.alertState) {
                     return;
                 }
+                if (data.Name === 'Stranger') {
+                    return;
+                }
+
+                if (this.lastFriendDetection + 10000 > new Date().getTime()) {
+                    return;
+                }
+
+                this.lastFriendDetection = new Date().getTime();
+
                 this.voiceService.read('Your friend ' + data.Name + ' is in front of you.');
             } else if (type === 'imageData') {
                 this.rectData = [];
@@ -129,7 +144,7 @@ export class CameraComponent implements OnInit, OnDestroy {
                         let text = 'I found ';
                         for (let objLabel in this.searchObjects) {
                             if (this.searchObjects[objLabel].includes(label)) {
-                                text += label + ' on ' + direction;
+                                text += label + ` in ${(distance / 10).toFixed(1)} meters on ` + direction;
                                 delete this.searchObjects[objLabel];
                             }
                         }
@@ -244,7 +259,7 @@ export class CameraComponent implements OnInit, OnDestroy {
     }
 
     callCommand(cmd) {
-        this.voiceService.read('Sure! I will search the room for a ' + cmd.label);
+        this.voiceService.read('Sure! I will search the room for ' + cmd.label);
         this.searchObjects[cmd.label] = cmd.tags;
         // console.log(this.searchObjects);
     }

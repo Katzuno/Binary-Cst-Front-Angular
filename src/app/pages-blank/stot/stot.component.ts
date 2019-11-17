@@ -59,10 +59,10 @@ export class StotComponent implements OnInit {
             apple: ['apple', 'aruit']
         };
         console.log(command);
-        if (command.includes('enable') && command.includes('alerts')) {
+        if (command.includes('enable') && (command.includes('alerts') || command.includes('warnings'))) {
             this.voiceService.read('Just enabled the alerts for you.');
             this.alertStateChange.emit(true);
-        } else if (command.includes('disable') && command.includes('alerts')) {
+        } else if (command.includes('disable') && (command.includes('alerts') || command.includes('warnings'))) {
             this.voiceService.read('Be safe! I have just disabled the alerts.');
             this.alertStateChange.emit(false);
         } else if (command.includes('water')) {
